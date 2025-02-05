@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "${PORT}:${PORT}"
+    profiles:
+      - production
+    env_file:
+      - ./.env.production
+    volumes:
+      - .:/app
+    networks:
+      - banking-net
+
+  dev-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${PORT}:${PORT}"
+    profiles:
+      - development
+    env_file:
+      - ./.env.development
+    volumes:
+      - .:/app
+    command: ["npm", "run", "start"]
+    networks:
+      - banking-net
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: banking_system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    profiles:
+      - development
+      - production
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  banking-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
